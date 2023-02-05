@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import Charts
 
 extension CLLocationCoordinate2D : Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -33,6 +34,7 @@ struct StartGameData: Encodable {
     let username: String
     let radius: Double
     let uuid: String
+    let heartRateTrack: [Int] = []
 }
 
 struct Pickup: Codable, MapEntity {
@@ -53,6 +55,7 @@ struct Player: Codable, MapEntity {
         UUID(uuidString: uuid)!
     }
     let username: String
+    let heartRateTrack: [Int]
     let heartRate: Int
     let points: Int
     let radius: Double
@@ -197,6 +200,7 @@ struct MapView: View {
             annotations = tmp
             
             var currentPlayer = updateData.players.first { p in p.username == viewModel.name }!
+            heartRateTrack = currentPlayer.heartRateTrack
             
 //            viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 4, longitudinalMeters: currentPlayer.radius * 4)
         }
@@ -243,18 +247,33 @@ struct MapView: View {
     @Binding var userId: UUID
     let bleSwitch: Bool
     
+    @State var sheetPresented = false
+    @State var heartRateTrack: [Int] = []
+    
     var body: some View {
         VStack {
             Map(coordinateRegion: $viewModel.region, annotationItems: annotations) { e in
                 MapAnnotation(coordinate: converted(e)) {
                     AnnotationView(viewModel: viewModel, mapEntity: e)
                 }
-            }.alert(isPresented: $viewModel.alert) {
-                Alert(title: Text("Location service not enabled"))
-            }.ignoresSafeArea(.all).onAppear {
+            }.onAppear {
                 viewModel.checkLocationEnabled()
                 workThread()
-            }
+            }.alert(isPresented: $viewModel.alert) {
+                Alert(title: Text("Location service not enabled"))
+            }.ignoresSafeArea(.all).overlay(
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("Statistics", action: {
+                            sheetPresented = true
+                        }).buttonStyle(.bordered).sheet(isPresented: $sheetPresented, content: {
+                            ReportChartView(heartRateTrack: heartRateTrack)
+                        })
+                    }
+                    Spacer()
+                }
+            )
             if !viewModel.started {
                 Group {
                     TextField("Name", text: $viewModel.name).padding()
@@ -272,11 +291,23 @@ struct MapView: View {
                     }.padding().buttonStyle(.bordered).disabled(viewModel.name == "")
                 }
             }
-//            else {
-//                let minutes = updateData.secondsRemaining / 60
-//                let seconds = updateData.secondsRemaining % 60
-//                Text(String(minutes) + ":" + String(seconds))
-//            }
+        }
+    }
+}
+
+struct ReportChartView: View {
+    let heartRateTrack: [Int]
+    var body: some View {
+        VStack {
+            Chart {
+                ForEach(heartRateTrack.indices, id: \.self) { index in
+                    LineMark(
+                        x: .value("Time", index),
+                        y: .value("Heart Rate", heartRateTrack[index])
+                    )
+                }
+            }
+            .frame(height: 300)
         }
     }
 }
