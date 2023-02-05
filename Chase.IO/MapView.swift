@@ -219,10 +219,7 @@ struct MapView: View {
             
             sendRequest(api: "update_game", info: info) { data, response, error in
                 guard let data = data else { print("Network error"); return }
-                print(String(data: data, encoding: .utf8)!)
                 let updateData = try! JSONDecoder().decode(UpdateData.self, from: data)
-                print(updateData)
-                print("update successful")
                 updateMap(updateData: updateData)
             }
         })
@@ -265,11 +262,13 @@ struct MapView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Button("Statistics", action: {
-                            sheetPresented = true
-                        }).buttonStyle(.bordered).sheet(isPresented: $sheetPresented, content: {
-                            ReportChartView(heartRateTrack: heartRateTrack)
-                        })
+                        if (heartRateTrack != []) {
+                            Button("Statistics", action: {
+                                sheetPresented = true
+                            }).buttonStyle(.bordered).sheet(isPresented: $sheetPresented, content: {
+                                ReportChartView(heartRateTrack: heartRateTrack)
+                            })
+                        }
                     }
                     Spacer()
                 }
@@ -341,8 +340,6 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         case .restricted, .denied:
             alert = true
         case .authorizedAlways, .authorizedWhenInUse:
-            print(locationManger.location!.coordinate.latitude)
-            print(locationManger.location!.coordinate.longitude)
             region = MKCoordinateRegion(
                 center: locationManger.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.0008, longitudeDelta: 0.0008))
         @unknown default:
