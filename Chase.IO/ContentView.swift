@@ -95,8 +95,12 @@ struct AnnotationView: View {
             .frame(width: (minSize + mapEntity.radius) * 3, height: (minSize + mapEntity.radius) * 3, alignment: .center)
         }.overlay(
             VStack {
-                Text(mapEntity.username)
-                Text(String(mapEntity.points))
+                if (mapEntity.type != EntityType.pickup) {
+                    Text(mapEntity.username)
+                    Text(String(mapEntity.points))
+                } else {
+                    Text(String(mapEntity.points))
+                }
             }
         )
     }
@@ -108,12 +112,14 @@ struct ContentView: View {
         var tmp: [MapEntityT] = []
         tmp.append(contentsOf: updateData.players.map{MapEntityT(entity: $0)})
         tmp.append(contentsOf: updateData.pickups.map{MapEntityT(entity: $0)})
-        annotations = tmp
         
-        var currentPlayer = updateData.players.first { p in p.username == viewModel.name }!
-
-//        viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 3, longitudinalMeters: currentPlayer.radius * 3)
-        
+        DispatchQueue.main.sync {
+            annotations = tmp
+            
+            var currentPlayer = updateData.players.first { p in p.username == viewModel.name }!
+            
+            viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 4, longitudinalMeters: currentPlayer.radius * 4)
+        }
     }
     
     func workThread() {
