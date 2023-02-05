@@ -1,0 +1,22 @@
+{
+  "pins" : [
+    {
+      "identity" : "bettersafariview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stleamist/BetterSafariView.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "dffd42bc70287e761979bc81dd278db5c80f0deb"
+      }
+    },
+    {
+      "identity" : "terrartios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tryterra/TerraRTiOS",
+      "state" : {
+        "revision" : "54edeaefa9f3e9fbc66504496c979492020b00fd"
+      }
+    }
+  ],
+  "version" : 2
+}

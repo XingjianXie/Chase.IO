@@ -7,19 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D344683298F664E00EF544F /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D344682298F664E00EF544F /* MapView.swift */; };
+		4D344685298F676300EF544F /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D344684298F676300EF544F /* Config.swift */; };
+		4D344688298F67A500EF544F /* TerraRTiOS in Frameworks */ = {isa = PBXBuildFile; productRef = 4D344687298F67A500EF544F /* TerraRTiOS */; };
+		4D3C3A89298F6C600065D688 /* BetterSafariView in Frameworks */ = {isa = PBXBuildFile; productRef = 4D3C3A88298F6C600065D688 /* BetterSafariView */; };
+		4D3C3A8B298F6FF70065D688 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3C3A8A298F6FF70065D688 /* Helper.swift */; };
 		4DAF8D42298EAEE60019024B /* Chase_IOApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DAF8D41298EAEE60019024B /* Chase_IOApp.swift */; };
 		4DAF8D44298EAEE60019024B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DAF8D43298EAEE60019024B /* ContentView.swift */; };
 		4DAF8D46298EAEE70019024B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DAF8D45298EAEE70019024B /* Assets.xcassets */; };
 		4DAF8D49298EAEE70019024B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DAF8D48298EAEE70019024B /* Preview Assets.xcassets */; };
+		4DC0517B298F64F200CFC97D /* TerraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC0517A298F64F100CFC97D /* TerraView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4D344682298F664E00EF544F /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		4D344684298F676300EF544F /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		4D3C3A8A298F6FF70065D688 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		4DAF8D3E298EAEE60019024B /* Chase.IO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chase.IO.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DAF8D41298EAEE60019024B /* Chase_IOApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chase_IOApp.swift; sourceTree = "<group>"; };
 		4DAF8D43298EAEE60019024B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4DAF8D45298EAEE70019024B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4DAF8D48298EAEE70019024B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4DAF8D4F298EB2CD0019024B /* Chase-IO-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Chase-IO-Info.plist"; sourceTree = SOURCE_ROOT; };
+		4DC0517A298F64F100CFC97D /* TerraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerraView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +37,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D344688298F67A500EF544F /* TerraRTiOS in Frameworks */,
+				4D3C3A89298F6C600065D688 /* BetterSafariView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,8 +67,12 @@
 				4DAF8D4F298EB2CD0019024B /* Chase-IO-Info.plist */,
 				4DAF8D41298EAEE60019024B /* Chase_IOApp.swift */,
 				4DAF8D43298EAEE60019024B /* ContentView.swift */,
+				4D344682298F664E00EF544F /* MapView.swift */,
 				4DAF8D45298EAEE70019024B /* Assets.xcassets */,
 				4DAF8D47298EAEE70019024B /* Preview Content */,
+				4DC0517A298F64F100CFC97D /* TerraView.swift */,
+				4D344684298F676300EF544F /* Config.swift */,
+				4D3C3A8A298F6FF70065D688 /* Helper.swift */,
 			);
 			path = Chase.IO;
 			sourceTree = "<group>";
@@ -85,6 +101,10 @@
 			dependencies = (
 			);
 			name = Chase.IO;
+			packageProductDependencies = (
+				4D344687298F67A500EF544F /* TerraRTiOS */,
+				4D3C3A88298F6C600065D688 /* BetterSafariView */,
+			);
 			productName = Chase.IO;
 			productReference = 4DAF8D3E298EAEE60019024B /* Chase.IO.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +133,10 @@
 				Base,
 			);
 			mainGroup = 4DAF8D35298EAEE60019024B;
+			packageReferences = (
+				4D344686298F67A500EF544F /* XCRemoteSwiftPackageReference "TerraRTiOS" */,
+				4D3C3A87298F6C600065D688 /* XCRemoteSwiftPackageReference "BetterSafariView" */,
+			);
 			productRefGroup = 4DAF8D3F298EAEE60019024B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -140,7 +164,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				4DAF8D44298EAEE60019024B /* ContentView.swift in Sources */,
+				4D344683298F664E00EF544F /* MapView.swift in Sources */,
+				4D344685298F676300EF544F /* Config.swift in Sources */,
 				4DAF8D42298EAEE60019024B /* Chase_IOApp.swift in Sources */,
+				4DC0517B298F64F200CFC97D /* TerraView.swift in Sources */,
+				4D3C3A8B298F6FF70065D688 /* Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,7 +301,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Chase-IO-Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Provide user with ability to connect to BLE devices";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need to use location";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Provide access to Gyroscope and Accelerometer data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -304,7 +334,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Chase-IO-Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Provide user with ability to connect to BLE devices";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need to use location";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Provide access to Gyroscope and Accelerometer data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -345,6 +377,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4D344686298F67A500EF544F /* XCRemoteSwiftPackageReference "TerraRTiOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tryterra/TerraRTiOS";
+			requirement = {
+				kind = revision;
+				revision = 54edeaefa9f3e9fbc66504496c979492020b00fd;
+			};
+		};
+		4D3C3A87298F6C600065D688 /* XCRemoteSwiftPackageReference "BetterSafariView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stleamist/BetterSafariView.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4D344687298F67A500EF544F /* TerraRTiOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4D344686298F67A500EF544F /* XCRemoteSwiftPackageReference "TerraRTiOS" */;
+			productName = TerraRTiOS;
+		};
+		4D3C3A88298F6C600065D688 /* BetterSafariView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4D3C3A87298F6C600065D688 /* XCRemoteSwiftPackageReference "BetterSafariView" */;
+			productName = BetterSafariView;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4DAF8D36298EAEE60019024B /* Project object */;
 }
