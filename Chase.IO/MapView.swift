@@ -53,6 +53,7 @@ struct Player: Codable, MapEntity {
         UUID(uuidString: uuid)!
     }
     let username: String
+    let heartRate: Int
     let points: Int
     let radius: Double
     let coordinate: CLLocationCoordinate2D
@@ -72,52 +73,132 @@ protocol MapEntity: Identifiable {
     var type: EntityType { get }
 }
 
-struct MapEntityT: Identifiable {
+struct MapEntityExtended: Identifiable {
     let entity: any MapEntity
-    var id: UUID {
-        entity.id as! UUID
+    let degree: Double
+    var id: String {
+        (entity.id as! UUID).uuidString + "-\(degree)"
     }
 }
 
 struct UpdateData: Codable {
     let pickups: [Pickup]
     let players: [Player]
+    let secondsRemaining : Int
 }
 
 struct AnnotationView: View {
     @ObservedObject var viewModel: ContentViewModel
-    let mapEntity: any MapEntity
+    let mapEntity: MapEntityExtended
     var body: some View {
         VStack(spacing: 0) {
-            let color = viewModel.name == mapEntity.username ? Color.blue : (mapEntity.type == EntityType.pickup ? Color.orange : Color.red)
-            let minSize = 10.0
-            Circle().stroke(color, lineWidth: 4 + mapEntity.radius / 10)
-            .frame(width: (minSize + mapEntity.radius) * 3, height: (minSize + mapEntity.radius) * 3, alignment: .center)
-        }.overlay(
-            VStack {
-                if (mapEntity.type != EntityType.pickup) {
-                    Text(mapEntity.username)
-                    Text(String(mapEntity.points))
-                } else {
-                    Text(String(mapEntity.points))
-                }
+            let color = viewModel.name == mapEntity.entity.username ? Color.blue : (mapEntity.entity.type == EntityType.pickup ? Color.orange : Color.red)
+            if mapEntity.degree != -1 {
+                let text = mapEntity.entity.radius > 20 ? "--" : "-"
+                Text(text).font(.system(size: 40)).foregroundColor(color).frame(width: 40, height: 40).rotationEffect(Angle(degrees: mapEntity.degree))
+            } else {
+                VStack {
+                    if (mapEntity.entity.type == .player) {
+                        Text(mapEntity.entity.username)
+                        if ((mapEntity.entity as! Player).heartRate != 0) {
+                            Text("❤️ \((mapEntity.entity as! Player).heartRate)")
+                        }
+                    }
+                    Text(String(mapEntity.entity.points))
+                }.frame(width: 80, height: 40)
             }
-        )
+        }
+    }
+}
+
+/*
+ let heartName = onFire ? "bolt.heart" : "heart"
+
+Image(systemName: heartName)
+    .resizable()
+    .frame(width: 50, height: 50)
+    .foregroundColor(.red)
+    .overlay(Text ("\(heartRate)"), alignment: .center)
+
+Image(systemName: "shield")
+  .resizable()
+  .frame(width: 50, height: 50)
+  .foregroundColor(.white)
+
+Image(systemName: "figure.fencing")
+    .resizable()
+    .frame(width: 50, height: 50)
+    .foregroundColor(.white)
+
+Image(systemName: "capsule")
+    .resizable()
+    .frame(width: 50, height: 50)
+    .foregroundColor(.white)
+    .overlay(Text ("\(points)"), alignment: .center)
+
+HStack (spacing: 0) {
+    Image(systemName: "capsule")
+            .resizable()
+            .frame(width: 50, height: 50)
+            .foregroundColor(.white)
+            .overlay(Text ("\(player.points)"), alignment: .center)
+}
+ */
+
+extension BinaryFloatingPoint {
+    var radians: Self {
+        self * .pi / 180
+    }
+    var degree: Self {
+        self / .pi * 180
     }
 }
 
 struct MapView: View {
+
+    func computeOffset(from: CLLocationCoordinate2D, distance: Double, heading: Double) -> CLLocationCoordinate2D {
+        let distance = distance / 6371009.0; //earth_radius = 6371009 # in meters
+        let heading = heading.radians
+        let fromLat = from.latitude.radians
+        let fromLng = from.longitude.radians
+        let cosDistance = cos(distance);
+        let sinDistance = sin(distance);
+        let sinFromLat = sin(fromLat);
+        let cosFromLat = cos(fromLat);
+        let sinLat = cosDistance * sinFromLat + sinDistance * cosFromLat * cos(heading);
+        let dLng = atan2(sinDistance * cosFromLat * sin(heading), cosDistance - sinFromLat * sinLat);
+        return CLLocationCoordinate2D(latitude: asin(sinLat).degree, longitude: (fromLng + dLng).degree);
+    }
+
+    func converted(_ entity: MapEntityExtended) -> CLLocationCoordinate2D {
+        if (entity.degree != -1) {
+            return computeOffset(from: entity.entity.coordinate, distance: entity.entity.radius, heading: entity.degree)
+        } else {
+            return entity.entity.coordinate
+        }
+    }
+
     func updateMap(updateData: UpdateData) {
-        var tmp: [MapEntityT] = []
-        tmp.append(contentsOf: updateData.players.map{MapEntityT(entity: $0)})
-        tmp.append(contentsOf: updateData.pickups.map{MapEntityT(entity: $0)})
+        var tmp: [MapEntityExtended] = []
+        var rangeList: [Int] = Array(stride(from: 0, to: 360, by: 30))
+        rangeList.append(-1)
+        tmp.append(contentsOf: updateData.players.flatMap{ entity in
+            rangeList.map { i in
+                MapEntityExtended(entity: entity, degree: Double(i))
+            }
+        })
+        tmp.append(contentsOf: updateData.pickups.flatMap{ entity in
+            rangeList.map { i in
+                MapEntityExtended(entity: entity, degree: Double(i))
+            }
+        })
         
         DispatchQueue.main.sync {
             annotations = tmp
             
             var currentPlayer = updateData.players.first { p in p.username == viewModel.name }!
             
-            viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 4, longitudinalMeters: currentPlayer.radius * 4)
+//            viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 4, longitudinalMeters: currentPlayer.radius * 4)
         }
     }
     
@@ -134,6 +215,7 @@ struct MapView: View {
             
             sendRequest(api: "update_game", info: info) { data, response, error in
                 guard let data = data else { print("Network error"); return }
+                print(String(data: data, encoding: .utf8)!)
                 let updateData = try! JSONDecoder().decode(UpdateData.self, from: data)
                 print(updateData)
                 print("update successful")
@@ -156,7 +238,7 @@ struct MapView: View {
     
     @StateObject private var viewModel = ContentViewModel()
     
-    @State var annotations: [MapEntityT] = []
+    @State var annotations: [MapEntityExtended] = []
     let uuid: UUID
     @Binding var userId: UUID
     let bleSwitch: Bool
@@ -164,8 +246,8 @@ struct MapView: View {
     var body: some View {
         VStack {
             Map(coordinateRegion: $viewModel.region, annotationItems: annotations) { e in
-                MapAnnotation(coordinate: e.entity.coordinate) {
-                    AnnotationView(viewModel: viewModel, mapEntity: e.entity)
+                MapAnnotation(coordinate: converted(e)) {
+                    AnnotationView(viewModel: viewModel, mapEntity: e)
                 }
             }.alert(isPresented: $viewModel.alert) {
                 Alert(title: Text("Location service not enabled"))
@@ -190,6 +272,11 @@ struct MapView: View {
                     }.padding().buttonStyle(.bordered).disabled(viewModel.name == "")
                 }
             }
+//            else {
+//                let minutes = updateData.secondsRemaining / 60
+//                let seconds = updateData.secondsRemaining % 60
+//                Text(String(minutes) + ":" + String(seconds))
+//            }
         }
     }
 }
@@ -202,8 +289,7 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.334_900,
                                        longitude: -122.009_020),
-        latitudinalMeters: 750,
-        longitudinalMeters: 750
+        span: MKCoordinateSpan(latitudeDelta: 0.0008, longitudeDelta: 0.0008)
     )
     
     func checkLocationEnabled() {
@@ -227,7 +313,7 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             print(locationManger.location!.coordinate.latitude)
             print(locationManger.location!.coordinate.longitude)
             region = MKCoordinateRegion(
-                center: locationManger.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                center: locationManger.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.0008, longitudeDelta: 0.0008))
         @unknown default:
             fatalError()
         }
