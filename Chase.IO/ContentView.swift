@@ -31,13 +31,18 @@ enum CodingKeys: String, CodingKey {
 struct StartGameData: Encodable {
     let coordinate: CLLocationCoordinate2D
     let username: String
+    let radius: Double
     let uuid = UUID().uuidString
 }
 
 struct Pickup: Codable, MapEntity {
-    let id = UUID()
+    let uuid: String
+    var id: UUID {
+        UUID(uuidString: uuid)!
+    }
     let username: String = "Pickup"
     let points: Int
+    let radius: Double
     let coordinate: CLLocationCoordinate2D
     let type = EntityType.pickup
 }
@@ -49,6 +54,7 @@ struct Player: Codable, MapEntity {
     }
     let username: String
     let points: Int
+    let radius: Double
     let coordinate: CLLocationCoordinate2D
     let type = EntityType.player
 }
@@ -61,6 +67,7 @@ enum EntityType: Codable {
 protocol MapEntity: Identifiable {
     var username: String { get }
     var points: Int { get }
+    var radius: Double { get }
     var coordinate:CLLocationCoordinate2D { get }
     var type: EntityType { get }
 }
@@ -82,15 +89,16 @@ struct AnnotationView: View {
     let mapEntity: any MapEntity
     var body: some View {
         VStack(spacing: 0) {
-            Image(systemName: "mappin.circle.fill")
-            .font(.title)
-            .foregroundColor(viewModel.name == mapEntity.username ? .blue : .red)
-
-            Image(systemName: "arrowtriangle.down.fill")
-            .font(.caption)
-            .foregroundColor(viewModel.name == mapEntity.username ? .blue : .red)
-            .offset(x: 0, y: -5)
-        }
+            let color = viewModel.name == mapEntity.username ? Color.blue : (mapEntity.type == EntityType.pickup ? Color.orange : Color.red)
+            let minSize = 10.0
+            Circle().stroke(color, lineWidth: 4 + mapEntity.radius / 10)
+            .frame(width: (minSize + mapEntity.radius) * 3, height: (minSize + mapEntity.radius) * 3, alignment: .center)
+        }.overlay(
+            VStack {
+                Text(mapEntity.username)
+                Text(String(mapEntity.points))
+            }
+        )
     }
 }
 
@@ -101,6 +109,11 @@ struct ContentView: View {
         tmp.append(contentsOf: updateData.players.map{MapEntityT(entity: $0)})
         tmp.append(contentsOf: updateData.pickups.map{MapEntityT(entity: $0)})
         annotations = tmp
+        
+        var currentPlayer = updateData.players.first { p in p.username == viewModel.name }!
+
+//        viewModel.region = MKCoordinateRegion(center: currentPlayer.coordinate, latitudinalMeters: currentPlayer.radius * 3, longitudinalMeters: currentPlayer.radius * 3)
+        
     }
     
     func workThread() {
@@ -111,12 +124,13 @@ struct ContentView: View {
             
             let loc = viewModel.locationManger?.location?.coordinate
             guard let loc = loc else { print("Can't find location"); return }
-            
-            var info = StartGameData(coordinate: loc, username: viewModel.name)
+
+            let info = StartGameData(coordinate: loc, username: viewModel.name, radius: 0)
             
             sendRequest(api: "update_game", info: info) { data, response, error in
                 guard let data = data else { print("Network error"); return }
-                var updateData = try! JSONDecoder().decode(UpdateData.self, from: data)
+                let updateData = try! JSONDecoder().decode(UpdateData.self, from: data)
+                print(updateData)
                 print("update successful")
                 updateMap(updateData: updateData)
             }
@@ -155,11 +169,11 @@ struct ContentView: View {
                 Group {
                     TextField("Name", text: $viewModel.name).padding()
                     Button("Start Game") {
-                        var info = StartGameData(coordinate: viewModel.locationManger!.location!.coordinate, username: viewModel.name)
+                        let info = StartGameData(coordinate: viewModel.locationManger!.location!.coordinate, username: viewModel.name, radius: 20)
                         
                         sendRequest(api: "start_game", info: info) { data, response, error in
                             guard let data = data else { print("Network error"); return }
-                            var res = String(data: data, encoding: .utf8)
+                            let res = String(data: data, encoding: .utf8)
                             if (res == "200") {
                                 viewModel.started = true;
                             }
@@ -212,6 +226,8 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             print(locationManger.location!.coordinate.longitude)
             region = MKCoordinateRegion(
                 center: locationManger.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+        @unknown default:
+            fatalError()
         }
     }
     
